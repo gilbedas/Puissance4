@@ -6,11 +6,13 @@
 /*   By: atheveno <atheveno@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/02/27 15:45:47 by atheveno          #+#    #+#             */
-/*   Updated: 2016/02/27 19:22:03 by ghery            ###   ########.fr       */
+/*   Updated: 2016/02/28 13:39:05 by ghery            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft/includes/libft.h"
+#include <time.h>
+#include <stdlib.h>
 //#include "libft.h"
 #define DEBUG	write(1, "DEBUG", 5);
 #define COLORJ1 "\x1B[31m0\033[0m"
@@ -29,6 +31,7 @@ void	print_map2(t_init *t);
 void	ft_putdown(t_init *t);
 int		play(t_init *t, int player);
 int		win(t_init t);
+int		rand_player(void);
 
 int		get_int(char *arg)
 {
@@ -53,7 +56,7 @@ int main(int argc, char **argv)
 	int	num;
 	int player;
 
-	player = 0;
+	player = rand_player();
 	t.j1 = ft_strdup(COLORJ1);
 	t.j2 = ft_strdup(COLORJ2);
 	t.x = 7;
@@ -81,7 +84,15 @@ int main(int argc, char **argv)
 			print_map2(&t);
 			if (win(t) == 1)
 			{
-				ft_printf("le joueur %d a gagner", player);
+				if (player == 1)
+					ft_printf("le joueur %c a gagner\n", 'R');
+				if (player == 0)
+					ft_printf("le joueur %c a gagner\n", 'J');
+				return (0);
+			}
+			else if (win(t) == 2)
+			{
+				ft_printf("egalite !\n");
 				return (0);
 			}
 			if (player == 0)
@@ -165,7 +176,10 @@ int			play(t_init *t, int player)
 		else
 		{
 			ft_printf("%d\n", num);
-			t->map[0][num - 1] = '1' + player;
+			if (player == 1)
+				t->map[0][num - 1] = 'R';
+			else if (player == 0)
+				t->map[0][num - 1] = 'J';
 			ft_putdown(t);
 			return (1);
 		}
@@ -203,8 +217,12 @@ int		win(t_init t)
 	int		i;
 	int		j;
 	int		count;
+	int		point;
+	int		k;
 
 	j = 0;
+	point = 0;
+	k = 0;
 	while (j < t.y)
 	{
 		i = 0;
@@ -223,20 +241,36 @@ int		win(t_init t)
 				count = 1;
 				while (t.map[j + count][i + count] == t.map[j][i])
 				{
-					if (count == 4)
+					if (count == 3)
 						return(1);
 					count++;
 				}
-				while (t.map[j - count][i - count] == t.map[j][i])
-				{
-					if (count == 4)
-						return (0);
-					count++;
-				}
+				count = 1;
+				if (j - 4 >= 0)
+					while (t.map[j - count][i + count] == t.map[j][i])
+					{
+						if (count == 3)
+							return (1);
+						count++;
+					}
 			}
+			if (t.map[j][i] == '.')
+				point++;
 			i++;
 		}
 		j++;
 	}
+	if (point == 0)
+		return (2);
+	ft_printf("il sort\n");
 	return (0);
+}
+
+int		rand_player(void)
+{
+	int		player;
+
+	srand(time(NULL));
+	player = rand() % 2;
+	return (player);
 }
